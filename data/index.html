@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8" />
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        html {
+            font-family: Helvetica;
+            display: inline-block;
+            margin: 0px auto;
+            text-align: center;
+        }
+
+        HR {
+            width: 30%;
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+
+        .button {
+            cursor: pointer;
+            background-color: #777777;
+            border: none;
+            color: white;
+            padding: 8px 8px;
+            text-decoration: none;
+            font-size: 20px;
+            margin: 2px;
+            cursor: pointer;
+            width: 140px;
+            height: 50px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .buttonek {
+            background-color: #195b6a;
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            text-decoration: none;
+            font-size: 15px;
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 7px;
+        }
+
+        .button1 {
+            background-color: green;
+        }
+
+        .button2 {
+            background-color: red;
+        }
+
+        .psmall {
+            font-size: 10px;
+        }
+
+        p {
+            margin: 0px;
+        }
+
+        #all {
+            text-align: center;
+            display: inline-block;
+            height: 180px;
+            width: 340px;
+            border: 3px solid black;
+            border-radius: 15px;
+        }
+
+        #anusu {
+            position: relative;
+            height: 100px;
+            width: 160px;
+            float: left;
+            left: 20px;
+            top: 26px;
+        }
+
+        #stan {
+            position: relative;
+            float: right;
+            right: 15px;
+            width: 150px;
+            height: 100px;
+            top: 37px;
+        }
+
+        #logoff {
+            position: relative;
+            top: 13px;
+            float: right;
+            right: 37px;
+            border-radius: 10px;
+        }
+    </style>
+    <script>
+        if(!localStorage.getItem('secret'))
+            localStorage.setItem('secret', prompt('Podaj klucz:', ''));
+    </script>
+    <script>
+        const ax = axios;
+
+        async function showState() {
+            let state = await ax.get("/state");
+            document.getElementById('stan').innerHTML = `<b><p style='color: ${state.data.state >= 50 ? 'green' : 'red'}'>${state.data.state >= 50 ? 'ON' : 'OFF'}</p></b>`; 
+        }
+
+        showState();
+        setInterval(showState, 1000);
+    
+        function relay(length, btn) {
+            ax.post("/relay", {length: length, secret: localStorage.getItem('secret') || ''}, {responseType: 'json'}).then(() => {
+                let org = btn.style.backgroundColor;
+                btn.style.backgroundColor = 'grey';
+                setTimeout(() => btn.style.backgroundColor = org, length);
+            }).catch(err => {
+                alert(err.response.data.error);
+            });
+        }
+
+        function resetSecret() {
+            localStorage.removeItem('secret');
+            window.location.reload(true);
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Sterowanie PC</h1>
+    <div id="all">
+        <div id="anusu">
+            <p>
+                <button id="abc" class="button button1" onclick="relay(500, this)">POWER</button>
+            </p>
+            <br />
+            <p>
+                <button id="abcd" class="button button2" onclick="relay(8000, this)">HARD OFF</button>
+            </p>
+        </div>
+        <div id="stan">
+            
+        </div>
+        <div id="logoff">
+            <p>
+                <button class="buttonek" onclick="resetSecret()">LOGOFF</button>
+            </p>
+        </div>
+    </div>
+    <br /><br />
+</body>
+</html>
